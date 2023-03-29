@@ -20,11 +20,14 @@ productsRouter.get("/", async (req, res, next) => {
     const query = {};
     if (req.query.minPrice && req.query.maxPrice)
       query.price = { [Op.between]: [req.query.minPrice, req.query.maxPrice] };
-    if (req.query.name) query.name = { [Op.iLike]: `%${req.query.name}%` };
-    if (req.query.description)
-      query.description = { [Op.iLike]: `%${req.query.description}%` };
     if (req.query.category)
       query.category = { [Op.iLike]: `%${req.query.category}%` };
+    if (req.query.search) {
+      query[Op.or] = [
+        { name: { [Op.iLike]: `%${req.query.search}%` } },
+        { description: { [Op.iLike]: `%${req.query.search}%` } },
+      ];
+    }
 
     const products = await ProductsModel.findAndCountAll({
       where: { ...query },
